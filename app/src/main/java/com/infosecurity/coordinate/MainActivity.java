@@ -178,8 +178,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 String name = chat.getString("name");
                                 String creator = chat.getString("creator");
                                 String last_message = chat.getString("last_message");
-                                // Add name of chats to a
+                                // Add name of chats to a list
                                 arrayOfChats.add(0, name);
+                                // Add name of IDs to list
                                 chatIds.add(0, chatID);
                             }
                         } catch (Exception e) {

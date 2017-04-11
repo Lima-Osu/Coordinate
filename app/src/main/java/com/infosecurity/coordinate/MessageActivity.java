@@ -35,12 +35,15 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
         // Create the arraylist to display the texts
         final ArrayList<String> messages = new ArrayList<>();
 
-        //
+        // ---------------
+        // Gets the chatID from last activity
         Bundle extras = getIntent().getExtras();
         if (extras != null){
             chatId = extras.getString("chatId");
         }
 
+        // Pull JSONOBJECT based on chatId value
+        
         // -------------
         //PULLS JSONOBJECT
         // GET to /chats/chat_id to get messages for the chosen chat
