@@ -48,7 +48,7 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
         // Create the list view
         final ListView listView = (ListView)findViewById(R.id.textListView);
         // Create the arraylist to display the texts
-        final ArrayList<String> messages = new ArrayList<>();
+        final ArrayList<String> messageArray = new ArrayList<>();
 
         // Get Mac address of device
         WifiManager manager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
@@ -81,6 +81,10 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
                             String chat_id = jsonObject.getString("chat_id");
                             String creator = jsonObject.getString("creator");
                             JSONArray messages = jsonObject.getJSONArray("messages");
+                            // Pull each message from json object and add it to the array
+                            for (int i = 0; i < messages.length(); i++){
+                                messageArray.add(0, messages.getString(i));
+                            }
                             //USE THESE VALUES TO AGGREGATE CHAT MESSAGES TO MESSAGEACTIVITY
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -101,7 +105,7 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
         //---------------
 
         // Create the adapter using the available chats
-        adapter = new ArrayAdapter<>(MessageActivity.this, android.R.layout.simple_list_item_1, messages);
+        adapter = new ArrayAdapter<>(MessageActivity.this, android.R.layout.simple_list_item_1, messageArray);
 
         listView.setAdapter(adapter);
 
