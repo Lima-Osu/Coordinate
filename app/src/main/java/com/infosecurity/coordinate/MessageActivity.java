@@ -1,5 +1,8 @@
 package com.infosecurity.coordinate;
 
+import android.content.Context;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -35,6 +38,11 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
         // Create the arraylist to display the texts
         final ArrayList<String> messages = new ArrayList<>();
 
+        // Get Mac address of device
+        WifiManager manager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+        WifiInfo info = manager.getConnectionInfo();
+        final String macAddress = info.getMacAddress();
+
         // ---------------
         // Gets the chatID from last activity
         Bundle extras = getIntent().getExtras();
@@ -43,7 +51,7 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
         }
 
         // Pull JSONOBJECT based on chatId value
-        
+
         // -------------
         //PULLS JSONOBJECT
         // GET to /chats/chat_id to get messages for the chosen chat

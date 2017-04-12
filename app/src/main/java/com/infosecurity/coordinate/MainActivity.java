@@ -18,6 +18,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -25,6 +26,9 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -33,10 +37,23 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener{
 
 
-    LocationManager locationManager;
+public class MainActivity extends AppCompatActivity implements View.OnClickListener,
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+
+    protected static final String TAG = "MainActivity";
+
+    /**
+     * Provides the entry point to Google Play services.
+     */
+    protected GoogleApiClient mGoogleApiClient;
+
+    /**
+     * Represents a geographical location.
+     */
+    protected Location mLastLocation;
+
     ArrayAdapter<String> adapter;
     private double longitude;
     private double latitude;
@@ -61,39 +78,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         final ListView listView = (ListView)findViewById(R.id.listView);
 
 
-
-        // Pull available text chat names from server
-
-
+        // ------------------------
+        // LANE: MAC address is right here, called macAddress
+        // Pass the two doubles latitude and longitude
         // Get Mac address of device
         WifiManager manager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         WifiInfo info = manager.getConnectionInfo();
-        final String address = info.getMacAddress();
+        final String macAddress = info.getMacAddress();
 
 
-        // Get location of device
-        // Acquire a reference to the system Location Manager
-        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-
-
-// Define a listener that responds to location updates
-        LocationListener locationListener = new LocationListener() {
-            public void onLocationChanged(Location location) {
-                // Called when a new location is found by the network location provider.
-                //makeUseOfNewLocation(location);
-            }
-
-            public void onStatusChanged(String provider, int status, Bundle extras) {}
-
-            public void onProviderEnabled(String provider) {}
-
-            public void onProviderDisabled(String provider) {}
-        };
-
-        String locationProvider = LocationManager.NETWORK_PROVIDER;
-        // Or, use GPS location data:
-        // String locationProvider = LocationManager.GPS_PROVIDER;
-        //locationManager.requestLocationUpdates(locationProvider, 0, 0, locationListener);
+        // Find GPS location
+        buildGoogleApiClient();
 
 
         // POST1 - SEND: MAC, LAT, LONG ;
@@ -264,6 +259,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 int chatIDIndex = arrayOfChats.indexOf(chatName);
                 String chatID = chatIds.get(chatIDIndex);
 
+                // ------------------------------------
+                // LANE: Create new chat with chatName variable
+
                 // Pass the chat ID to the message activity
                 Intent i = new Intent(getApplicationContext(), MessageActivity.class);
                 i.putExtra(chatID, true);
@@ -279,5 +277,64 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         AlertDialog alert = alertDialogBuilder.create();
         alert.show();
+    }
+
+    protected void onStart() {
+        mGoogleApiClient.connect();
+        super.onStart();
+    }
+
+    protected void onStop() {
+        mGoogleApiClient.disconnect();
+        super.onStop();
+    }
+
+    /**
+     * Builds a GoogleApiClient. Uses the addApi() method to request the LocationServices API.
+     */
+    protected synchronized void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+    }
+
+    /**
+     * Runs when a GoogleApiClient object successfully connects.
+     */
+    @Override
+    public void onConnected(Bundle connectionHint) {
+        // Provides a simple way of getting a device's location and is well suited for
+        // applications that do not require a fine-grained location and that do not need location
+        // updates. Gets the best and most recent location currently available, which may be null
+        // in rare cases when a location is not available.
+        try{
+            mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            if (mLastLocation != null) {
+                latitude = mLastLocation.getLatitude();
+                longitude = mLastLocation.getLongitude();
+            } else {
+                //Toast.makeText(this, R.string.no_location_detected, Toast.LENGTH_LONG).show();
+            }
+        } catch (SecurityException e){
+            // Do something
+        }
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult result) {
+        // Refer to the javadoc for ConnectionResult to see what error codes might be returned in
+        // onConnectionFailed.
+        Log.i(TAG, "Connection failed: ConnectionResult.getErrorCode() = " + result.getErrorCode());
+    }
+
+
+    @Override
+    public void onConnectionSuspended(int cause) {
+        // The connection to Google Play services was lost for some reason. We call connect() to
+        // attempt to re-establish the connection.
+        Log.i(TAG, "Connection suspended");
+        mGoogleApiClient.connect();
     }
 }
