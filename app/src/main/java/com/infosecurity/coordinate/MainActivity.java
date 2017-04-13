@@ -54,9 +54,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private double longitude = 1.0;
     private double latitude = 1.0;
     // Create arrayList of ids to associate the names with
-    final ArrayList<String> chatIds = new ArrayList<>();
+    ArrayList<String> chatIds = new ArrayList<>();
     // Create the arraylist to display the texts
-    final ArrayList<String> arrayOfChats = new ArrayList<>();
+    ArrayList<String> arrayOfChats = new ArrayList<>();
     // Create mylocation
     LocationManager mLocationManager;
 
@@ -91,18 +91,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         LocationManager mLocationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
         String provider = LocationManager.GPS_PROVIDER;
-        Location location = mLocationManager.getLastKnownLocation(provider);
-
-        try{
-
-            updateLocation(location);
-            mLocationManager.requestLocationUpdates( LocationManager.GPS_PROVIDER, 0, 0, this);
-            mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
-        } catch (SecurityException e){
-            // testing if it's entering here
-            int test = 0;
-            test++;
-        }
+        //Location location = mLocationManager.getLastKnownLocation(provider);
 
 
 
@@ -179,7 +168,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         try {
                             JSONObject jsonObject = new JSONObject(response);
 
-                            JSONArray jsonArray = jsonObject.getJSONArray("chat");
+                            JSONArray jsonArray = jsonObject.getJSONArray("chats");
                             for(int i = 0; i< jsonArray.length(); i++) {
                                 //VALUES TO PULL HERE.
                                 //-------------
