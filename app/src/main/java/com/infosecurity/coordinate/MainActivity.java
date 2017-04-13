@@ -3,12 +3,14 @@ package com.infosecurity.coordinate;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -40,14 +42,8 @@ import java.util.Map;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener,
-        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+        LocationListener {
 
-    protected static final String TAG = "MainActivity";
-
-    /**
-     * Provides the entry point to Google Play services.
-     */
-    protected GoogleApiClient mGoogleApiClient;
 
     /**
      * Represents a geographical location.
@@ -55,12 +51,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected Location mLastLocation;
 
     ArrayAdapter<String> adapter;
-    private double longitude;
-    private double latitude;
+    private double longitude = 1.0;
+    private double latitude = 1.0;
     // Create arrayList of ids to associate the names with
     final ArrayList<String> chatIds = new ArrayList<>();
     // Create the arraylist to display the texts
     final ArrayList<String> arrayOfChats = new ArrayList<>();
+    // Create mylocation
+    LocationManager mLocationManager;
 
 
     @Override
@@ -88,7 +86,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
         // Find GPS location
-        buildGoogleApiClient();
+
+        ///
+
+        LocationManager mLocationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+        String provider = LocationManager.GPS_PROVIDER;
+        Location location = mLocationManager.getLastKnownLocation(provider);
+
+        try{
+
+            updateLocation(location);
+            mLocationManager.requestLocationUpdates( LocationManager.GPS_PROVIDER, 0, 0, this);
+            mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
+        } catch (SecurityException e){
+            // testing if it's entering here
+            int test = 0;
+            test++;
+        }
+
 
 
         // POST1 - SEND: MAC, LAT, LONG ;
@@ -178,7 +193,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 // Add name of IDs to list
                                 chatIds.add(0, chatID);
                             }
+                            // Create the adapter using the available chats
+                            adapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, arrayOfChats);
+
+                            listView.setAdapter(adapter);
                         } catch (Exception e) {
+                            // Create the adapter using the available chats
+                            String noChats = "There are no chats near you :(";
+                            arrayOfChats.add(0, noChats);
+                            adapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, arrayOfChats);
+
+                            listView.setAdapter(adapter);
                             e.printStackTrace();
                             Log.wtf("error", e.getMessage());
                             //Test commit changes.
@@ -213,10 +238,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //--------------END OF VOLLEY WORK IN MAINACTIVITY.
 
 
-        // Create the adapter using the available chats
-        adapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, arrayOfChats);
-
-        listView.setAdapter(adapter);
 
         // Open text messages for specified chat
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -279,62 +300,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         alert.show();
     }
 
-    protected void onStart() {
-        mGoogleApiClient.connect();
-        super.onStart();
-    }
 
-    protected void onStop() {
-        mGoogleApiClient.disconnect();
-        super.onStop();
-    }
-
-    /**
-     * Builds a GoogleApiClient. Uses the addApi() method to request the LocationServices API.
-     */
-    protected synchronized void buildGoogleApiClient() {
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
-    }
-
-    /**
-     * Runs when a GoogleApiClient object successfully connects.
-     */
     @Override
-    public void onConnected(Bundle connectionHint) {
-        // Provides a simple way of getting a device's location and is well suited for
-        // applications that do not require a fine-grained location and that do not need location
-        // updates. Gets the best and most recent location currently available, which may be null
-        // in rare cases when a location is not available.
-        try{
-            mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-            if (mLastLocation != null) {
-                latitude = mLastLocation.getLatitude();
-                longitude = mLastLocation.getLongitude();
-            } else {
-                //Toast.makeText(this, R.string.no_location_detected, Toast.LENGTH_LONG).show();
-            }
-        } catch (SecurityException e){
-            // Do something
-        }
+    public void onLocationChanged(Location location) {
+        // TODO Auto-generated method stub
+        longitude = location.getLongitude();
+        latitude = location.getLatitude();
     }
 
     @Override
-    public void onConnectionFailed(ConnectionResult result) {
-        // Refer to the javadoc for ConnectionResult to see what error codes might be returned in
-        // onConnectionFailed.
-        Log.i(TAG, "Connection failed: ConnectionResult.getErrorCode() = " + result.getErrorCode());
-    }
+    public void onProviderDisabled(String provider) {
+        // TODO Auto-generated method stub
 
+    }
 
     @Override
-    public void onConnectionSuspended(int cause) {
-        // The connection to Google Play services was lost for some reason. We call connect() to
-        // attempt to re-establish the connection.
-        Log.i(TAG, "Connection suspended");
-        mGoogleApiClient.connect();
+    public void onProviderEnabled(String provider) {
+        // TODO Auto-generated method stub
+
     }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+        // TODO Auto-generated method stub
+
+    }
+    void updateLocation(Location location){
+        longitude = location.getLongitude();
+        latitude = location.getLatitude();
+    }
+
 }
