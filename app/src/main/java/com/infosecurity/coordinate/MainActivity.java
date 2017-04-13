@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // LANE: MAC address is right here, called macAddress
         // Pass the two doubles latitude and longitude
         // Get Mac address of device
-        WifiManager manager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+        WifiManager manager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         WifiInfo info = manager.getConnectionInfo();
         final String macAddress = info.getMacAddress();
 
@@ -134,9 +134,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             protected Map<String, String> getParams()
             {
                 Map<String, String>  params = new HashMap<String, String>();
-                params.put("mac_address", "testtest");
-                params.put("latitude", "1");
-                params.put("longitude", "1");
+                params.put("mac_address", macAddress);
+                params.put("latitude", Double.toString(latitude));
+                params.put("longitude", Double.toString(longitude));
 
                 return params;
             }
@@ -201,7 +201,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             {
                 Map<String, String>  params = new HashMap<String, String>();
                 //CHANGE THIS TO ADDRESS NOT "TESTTEST" WHEN READY
-                params.put("mac_address", "testtest");
+                params.put("mac_address", macAddress);
                 return params;
             }
             @Override
