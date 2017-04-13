@@ -35,6 +35,7 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
     RequestQueue chatQueue = Volley.newRequestQueue(MessageActivity.this);
     String chatId;
     RequestQueue queue = Volley.newRequestQueue(MessageActivity.this);
+    String macAddress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,9 +52,9 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
         final ArrayList<String> messageArray = new ArrayList<>();
 
         // Get Mac address of device
-        WifiManager manager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+        WifiManager manager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);;
         WifiInfo info = manager.getConnectionInfo();
-        final String macAddress = info.getMacAddress();
+        macAddress = info.getMacAddress();
 
         // ---------------
         // Gets the chatID from last activity
@@ -116,7 +117,7 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
     @Override
     public void onClick(View v){
         // Get message
-        String messsage = this.messageEditableText.getText().toString();
+        final String messsage = this.messageEditableText.getText().toString();
         // Send to server
         //POST to /messages with params mac_address, content, chat_id [to create a message]
         RequestQueue postQueue = Volley.newRequestQueue(MessageActivity.this);
@@ -160,9 +161,9 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
             protected Map<String, String> getParams()
             {
                 Map<String, String>  params = new HashMap<String, String>();
-                params.put("mac_address", "testtest"); //=> address
-                params.put("content", "this is test content message."); //=> message
-                params.put("chat_id", "18");
+                params.put("mac_address", macAddress); //=> address
+                params.put("content", messsage); //=> message
+                params.put("chat_id", chatId);
 
                 return params;
             }
