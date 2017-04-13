@@ -1,8 +1,11 @@
 package com.infosecurity.coordinate;
 
+import android.*;
+import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -11,6 +14,7 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -45,10 +49,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         LocationListener {
 
 
-    /**
-     * Represents a geographical location.
-     */
-    protected Location mLastLocation;
+    private static final int MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION = 1;
+    private static final int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 2;
 
     ArrayAdapter<String> adapter;
     private double longitude = 1.0;
@@ -58,7 +60,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     // Create the arraylist to display the texts
     final ArrayList<String> arrayOfChats = new ArrayList<>();
     // Create mylocation
-    LocationManager mLocationManager;
 
 
     @Override
@@ -84,27 +85,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         WifiInfo info = manager.getConnectionInfo();
         final String macAddress = info.getMacAddress();
 
-
-        // Find GPS location
-
+        getPermissions();
         ///
-
-        LocationManager mLocationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
-        String provider = LocationManager.GPS_PROVIDER;
-        Location location = mLocationManager.getLastKnownLocation(provider);
-
-        try{
-
-            updateLocation(location);
-            mLocationManager.requestLocationUpdates( LocationManager.GPS_PROVIDER, 0, 0, this);
-            mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
-        } catch (SecurityException e){
-            // testing if it's entering here
-            int test = 0;
-            test++;
-        }
-
-
 
         // POST1 - SEND: MAC, LAT, LONG ;
         // RETURN: mac_address, username, id, created_at, updated_at, latitude, longitude
@@ -328,6 +310,84 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     void updateLocation(Location location){
         longitude = location.getLongitude();
         latitude = location.getLatitude();
+    }
+
+
+    public void getPermissions() {
+        // Here, thisActivity is the current activity
+        if (ContextCompat.checkSelfPermission(MainActivity.this,
+                Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(MainActivity.this,
+                    new String[]{Manifest.permission.GET_ACCOUNTS},
+                    MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION);
+        }
+        // Here, thisActivity is the current activity
+        if (ContextCompat.checkSelfPermission(MainActivity.this,
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(MainActivity.this,
+                    new String[]{Manifest.permission.GET_ACCOUNTS},
+                    MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    try{
+                        LocationManager mLocationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+                        String provider = LocationManager.GPS_PROVIDER;
+                        Location location = mLocationManager.getLastKnownLocation(provider);
+                        updateLocation(location);
+                    } catch (SecurityException e){
+
+                    }
+
+
+                } else {
+
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission..
+                    Toast.makeText(MainActivity.this, "Permission denied to get Account", Toast.LENGTH_SHORT).show();
+
+                }
+                return;
+            }
+            case MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    try{
+                        LocationManager mLocationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+                        String provider = LocationManager.GPS_PROVIDER;
+                        Location location = mLocationManager.getLastKnownLocation(provider);
+                        updateLocation(location);
+                    } catch (SecurityException e){
+
+                    }
+
+                } else {
+
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission..
+                    Toast.makeText(MainActivity.this, "Permission denied to get Account", Toast.LENGTH_SHORT).show();
+
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
     }
 
 }
