@@ -34,6 +34,7 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
     ArrayAdapter<String> adapter;
     String chatId;
     String macAddress;
+    String nameOfChat;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +60,12 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
         Bundle extras = getIntent().getExtras();
         if (extras != null){
             chatId = extras.getString("chatId");
+            // Get name of chat
+            nameOfChat = extras.getString("chatName");
         }
+
+        // Set the title in actionBar to name of chat
+        setTitle(nameOfChat);
 
         // Pull JSONOBJECT based on chatId value
 

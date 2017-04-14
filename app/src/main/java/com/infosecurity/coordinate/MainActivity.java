@@ -203,6 +203,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                         // Pass the chat ID to the message activity
                                         Intent i = new Intent(MainActivity.this, MessageActivity.class);
                                         i.putExtra("chatId", chatID);
+                                        String nameOfChat = arrayOfChats.get(position);
+                                        i.putExtra("chatName", nameOfChat);
                                         startActivity(i);
                                     }
                                 });
