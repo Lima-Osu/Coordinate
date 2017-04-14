@@ -32,9 +32,7 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
 
     private EditText messageEditableText;
     ArrayAdapter<String> adapter;
-    RequestQueue chatQueue = Volley.newRequestQueue(MessageActivity.this);
     String chatId;
-    RequestQueue queue = Volley.newRequestQueue(MessageActivity.this);
     String macAddress;
 
     @Override
@@ -68,6 +66,7 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
         // -------------
         //PULLS JSONOBJECT
         // GET to /chats/chat_id to get messages for the chosen chat
+        RequestQueue queue = Volley.newRequestQueue(MessageActivity.this);
         final String url = "https://morning-anchorage-16263.herokuapp.com/chats/" + chatId;
         JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>()
@@ -84,8 +83,15 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
                             JSONArray messages = jsonObject.getJSONArray("messages");
                             // Pull each message from json object and add it to the array
                             for (int i = 0; i < messages.length(); i++){
-                                messageArray.add(0, messages.getString(i));
+                                JSONObject jo = messages.getJSONObject(i);
+                                //int id=jo.getInt("id");
+                                String content=jo.getString("content");
+                                messageArray.add(content);
+                                //messageArray.add(0, messages.getString(i));
                             }
+                            adapter = new ArrayAdapter<>(MessageActivity.this, android.R.layout.simple_list_item_1, messageArray);
+
+                            listView.setAdapter(adapter);
                             //USE THESE VALUES TO AGGREGATE CHAT MESSAGES TO MESSAGEACTIVITY
                         } catch (Exception e) {
                             e.printStackTrace();

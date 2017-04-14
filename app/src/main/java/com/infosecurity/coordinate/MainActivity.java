@@ -57,9 +57,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private double latitude = 1.0;
     // Create arrayList of ids to associate the names with
     final ArrayList<String> chatIds = new ArrayList<>();
-    // Create the arraylist to display the texts
     final ArrayList<String> arrayOfChats = new ArrayList<>();
+    // Create the arraylist to display the texts
     // Create mylocation
+    String macAddress;
 
 
     @Override
@@ -83,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // Get Mac address of device
         WifiManager manager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         WifiInfo info = manager.getConnectionInfo();
-        final String macAddress = info.getMacAddress();
+        macAddress = info.getMacAddress();
 
         getPermissions();
         ///
@@ -161,7 +162,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         try {
                             JSONObject jsonObject = new JSONObject(response);
 
-                            JSONArray jsonArray = jsonObject.getJSONArray("chat");
+                            JSONArray jsonArray = jsonObject.getJSONArray("chats");
                             for(int i = 0; i< jsonArray.length(); i++) {
                                 //VALUES TO PULL HERE.
                                 //-------------
@@ -179,6 +180,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             adapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, arrayOfChats);
 
                             listView.setAdapter(adapter);
+                            // Open text messages for specified chat
+                            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                                @Override
+                                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                                    // Get right chat id on click
+                                    String chatID = chatIds.get(position);
+
+                                    // Pass the chat ID to the message activity
+                                    Intent i = new Intent(MainActivity.this, MessageActivity.class);
+                                    i.putExtra("chatId", chatID);
+                                    startActivity(i);
+                                }
+                            });
                         } catch (Exception e) {
                             // Create the adapter using the available chats
                             String noChats = "There are no chats near you :(";
@@ -221,19 +235,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
 
-        // Open text messages for specified chat
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // Get right chat id on click
-                String chatID = chatIds.get(position);
 
-                // Pass the chat ID to the message activity
-                Intent i = new Intent(getApplicationContext(), MessageActivity.class);
-                i.putExtra("chatId", chatID);
-                startActivity(i);
-            }
-        });
 
     }
 
@@ -251,24 +253,84 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         alertDialogBuilder.setView(editText);
 
         alertDialogBuilder.setPositiveButton("Create",new DialogInterface.OnClickListener(){
-            final String chatName = editText.getText().toString();
+
             @Override
             public void onClick(final DialogInterface dialog, int which) {
+                final String chatName = editText.getText().toString();
                 // Send chatName to server
                 if (chatName.length() == 0){
                     dialog.dismiss();
                 }
                 // Get position of chat name to retrieve chat id
-                int chatIDIndex = arrayOfChats.indexOf(chatName);
-                String chatID = chatIds.get(chatIDIndex);
+                //int chatIDIndex = arrayOfChats.indexOf(chatName);
+                //final String chatID = chatIds.get(chatIDIndex);
 
                 // ------------------------------------
                 // LANE: Create new chat with chatName variable
+                //final String url = "https://morning-anchorage-16263.herokuapp.com/get_chats";
+                final String url = "https://morning-anchorage-16263.herokuapp.com/chats";
+                RequestQueue createQueue = Volley.newRequestQueue(MainActivity.this);
+                StringRequest createRequest = new StringRequest(Request.Method.POST, url,
+                        new Response.Listener<String>()
+                        {
+                            @Override
+                            public void onResponse(String response) {
+                                // response
+                                Log.d("Response", response.toString());
+                                try {
+                                    JSONObject jsonObject = new JSONObject(response);
+                                    //VALUES TO PULL HERE.
+                                    //-------------
+                                    //String mac_address = jsonObject.getString("mac_address");
+                                    //String latitude = jsonObject.getString("latitude");
+                                    //String longitude = jsonObject.getString("longitude");
+                                     String id = jsonObject.getString("id");
+                                    //String username = jsonObject.getString("username");
+                                    // Pass the chat ID to the message activity
+                                    Intent i = new Intent(MainActivity.this, MessageActivity.class);
+                                    i.putExtra("chatId", id);
+                                    startActivity(i);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                    Log.wtf("error", e.getMessage());
+                                    //Test commit changes.
+                                }
 
+                            }
+                        },
+                        new Response.ErrorListener()
+                        {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                // error
+                                System.out.println(error.getMessage());
+                                Log.d("Error Response", error.toString());
+                            }
+                        }
+                ) {
+                    @Override
+                    protected Map<String, String> getParams()
+                    {
+                        Map<String, String>  params = new HashMap<String, String>();
+                        params.put("mac_address", macAddress);
+                        params.put("latitude", Double.toString(latitude));
+                        params.put("longitude", Double.toString(longitude));
+                        params.put("name",chatName);
+
+                        return params;
+                    }
+                    @Override
+                    public String getBodyContentType() {
+                        return "application/x-www-form-urlencoded; charset=UTF-8";
+                        //return "application/text/html; charset=UTF-8";
+                        //return "application/json";
+                    }
+                };
+                createQueue.add(createRequest);
                 // Pass the chat ID to the message activity
-                Intent i = new Intent(getApplicationContext(), MessageActivity.class);
+                /*Intent i = new Intent(getApplicationContext(), MessageActivity.class);
                 i.putExtra(chatID, true);
-                startActivity(i);
+                startActivity(i);*/
             }
         });
         alertDialogBuilder.setNegativeButton("Cancel",new DialogInterface.OnClickListener(){
