@@ -54,8 +54,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static final int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 2;
 
     ArrayAdapter<String> adapter;
-    private double longitude = 9.0;
-    private double latitude = 9.0;
+    private double longitude = 1.0;
+    private double latitude = 1.0;
     // Create arrayList of ids to associate the names with
     final ArrayList<String> chatIds = new ArrayList<>();
     final ArrayList<String> arrayOfChats = new ArrayList<>();
