@@ -161,7 +161,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         try {
                             JSONObject jsonObject = new JSONObject(response);
 
-                            JSONArray jsonArray = jsonObject.getJSONArray("chat");
+                            JSONArray jsonArray = jsonObject.getJSONArray("chats");
                             for(int i = 0; i< jsonArray.length(); i++) {
                                 //VALUES TO PULL HERE.
                                 //-------------
