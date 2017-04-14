@@ -29,4 +29,15 @@
         android:textColor="@color/textColor"
         android:textSize="25dp"
         android:background="@drawable/chat_button"/>
+
+    <ImageButton
+        android:id="@+id/refreshButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true"
+        android:src="@drawable/quantum_ic_refresh_white_24"
+        android:textColor="@color/textColor"
+        android:textSize="25dp"
+        android:background="@drawable/chat_button"/>
 </RelativeLayout>

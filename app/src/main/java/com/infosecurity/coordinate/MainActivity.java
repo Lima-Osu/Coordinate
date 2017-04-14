@@ -23,6 +23,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -53,14 +54,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static final int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 2;
 
     ArrayAdapter<String> adapter;
-    private double longitude = 1.0;
-    private double latitude = 1.0;
+    private double longitude = 9.0;
+    private double latitude = 9.0;
     // Create arrayList of ids to associate the names with
     final ArrayList<String> chatIds = new ArrayList<>();
     final ArrayList<String> arrayOfChats = new ArrayList<>();
     // Create the arraylist to display the texts
     // Create mylocation
     String macAddress;
+    Boolean pingedServer = false;
 
 
     @Override
@@ -72,6 +74,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         final Button newChat = (Button)findViewById(R.id.chatButton);
         newChat.setClickable(true);
         newChat.setOnClickListener(MainActivity.this);
+        final ImageButton refreshButton = (ImageButton) findViewById(R.id.refreshButton);
+        refreshButton.setClickable(true);
+        refreshButton.setOnClickListener(MainActivity.this);
 
 
         // Create the list view
@@ -176,30 +181,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 // Add name of IDs to list
                                 chatIds.add(0, chatID);
                             }
-                            // Create the adapter using the available chats
-                            adapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, arrayOfChats);
+                            if (arrayOfChats.size() == 0 && pingedServer){
+                                String noChats = "There are no chats in your area :(";
+                                arrayOfChats.add(0, noChats);
+                                // Create the adapter using the available chats
+                                adapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, arrayOfChats);
 
-                            listView.setAdapter(adapter);
-                            // Open text messages for specified chat
-                            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                                @Override
-                                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                                    // Get right chat id on click
-                                    String chatID = chatIds.get(position);
+                                listView.setAdapter(adapter);
+                            } else{
+                                // Create the adapter using the available chats
+                                adapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, arrayOfChats);
 
-                                    // Pass the chat ID to the message activity
-                                    Intent i = new Intent(MainActivity.this, MessageActivity.class);
-                                    i.putExtra("chatId", chatID);
-                                    startActivity(i);
-                                }
-                            });
+                                listView.setAdapter(adapter);
+                                // Open text messages for specified chat
+                                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                                    @Override
+                                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                                        // Get right chat id on click
+                                        String chatID = chatIds.get(position);
+
+                                        // Pass the chat ID to the message activity
+                                        Intent i = new Intent(MainActivity.this, MessageActivity.class);
+                                        i.putExtra("chatId", chatID);
+                                        startActivity(i);
+                                    }
+                                });
+                            }
+
                         } catch (Exception e) {
-                            // Create the adapter using the available chats
-                            String noChats = "There are no chats near you :(";
-                            arrayOfChats.add(0, noChats);
-                            adapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, arrayOfChats);
-
-                            listView.setAdapter(adapter);
                             e.printStackTrace();
                             Log.wtf("error", e.getMessage());
                             //Test commit changes.
@@ -221,6 +230,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             protected Map<String, String> getParams()
             {
                 Map<String, String>  params = new HashMap<String, String>();
+                // Let the arrayAdapter know you have information
+                pingedServer = true;
                 //CHANGE THIS TO ADDRESS NOT "TESTTEST" WHEN READY
                 params.put("mac_address", macAddress);
                 return params;
@@ -241,7 +252,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v){
-        createChat();
+        switch(v.getId()){
+            case R.id.chatButton:
+                createChat();
+                break;
+            case R.id.refreshButton:
+                finish();
+                startActivity(getIntent());
+        }
+
     }
 
     public void createChat(){
@@ -418,7 +437,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission..
-                    Toast.makeText(MainActivity.this, "Permission denied to get Account", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(MainActivity.this, "Permission denied to get Account", Toast.LENGTH_SHORT).show();
 
                 }
                 return;
@@ -441,7 +460,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission..
-                    Toast.makeText(MainActivity.this, "Permission denied to get Account", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(MainActivity.this, "Permission denied to get Account", Toast.LENGTH_SHORT).show();
 
                 }
                 return;

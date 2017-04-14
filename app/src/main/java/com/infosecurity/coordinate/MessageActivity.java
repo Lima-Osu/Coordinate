@@ -124,6 +124,7 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
     public void onClick(View v){
         // Get message
         final String messsage = this.messageEditableText.getText().toString();
+        this.messageEditableText.getText().clear();
         // Send to server
         //POST to /messages with params mac_address, content, chat_id [to create a message]
         RequestQueue postQueue = Volley.newRequestQueue(MessageActivity.this);
@@ -170,6 +171,9 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
                 params.put("mac_address", macAddress); //=> address
                 params.put("content", messsage); //=> message
                 params.put("chat_id", chatId);
+                // Refresh Activity
+                finish();
+                startActivity(getIntent());
 
                 return params;
             }
